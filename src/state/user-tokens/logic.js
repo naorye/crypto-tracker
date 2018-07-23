@@ -1,8 +1,7 @@
 import { createLogic } from 'redux-logic';
-import { push } from 'react-router-redux';
 import * as actions from './actions';
 import { selectors } from './reducer';
-import { getUserTokenIds, getSpecificTokens } from '../../resources';
+import { getUserTokenIds, getSpecificTokens, setUserTokenIds } from '../../resources';
 
 export const fetchUserTokens = createLogic({
     type: actions.fetchUserTokens,
@@ -26,9 +25,29 @@ export const fetchUserTokens = createLogic({
             const userTokens = await getSpecificTokens.call({ token, tokenIds });
 
             dispatch(actions.fetchUserTokensSuccess(userTokens));
-            dispatch(push('/'));
         } catch (error) {
             dispatch(actions.fetchUserTokensFailed(error.message));
+        }
+
+        done();
+    },
+});
+
+export const saveUserTokens = createLogic({
+    type: actions.saveUserTokens,
+
+    async process({ action }, dispatch, done) {
+        const { tokenIds } = action.payload;
+
+        try {
+            const token = window.localStorage.getItem('token');
+            const userTokenIds = await setUserTokenIds.call({ token, tokenIds });
+            const userTokens = await getSpecificTokens.call({ token, tokenIds: userTokenIds });
+
+            dispatch(actions.fetchUserTokensSuccess(userTokens));
+            dispatch(actions.closeEditTokensModal());
+        } catch (error) {
+            // Do nothing
         }
 
         done();

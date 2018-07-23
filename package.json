@@ -47,6 +47,7 @@
     "redux-act": "^1.7.4",
     "redux-logger": "^3.0.6",
     "redux-logic": "^0.12.3",
+    "reselect": "^3.0.1",
     "sass-loader": "^7.0.1",
     "start-server-webpack-plugin": "^2.2.5",
     "stats-webpack-plugin": "^0.6.2",

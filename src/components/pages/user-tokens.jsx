@@ -6,11 +6,15 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
+import EditTokensModal from './edit-tokens-modal';
 import { selectors } from '../../state/user-tokens/reducer';
 import * as actions from '../../state/user-tokens/actions';
+import { selectors as userProfile } from '../../state/user-profile/reducer';
 
 @withStyles(theme => ({
     root: {
@@ -24,41 +28,60 @@ import * as actions from '../../state/user-tokens/actions';
     snackbar: {
         margin: theme.spacing.unit,
     },
+    button: {
+        position: 'absolute',
+        bottom: theme.spacing.unit * 2,
+        right: theme.spacing.unit * 2,
+    },
 }))
 
 @connect(
     (state) => {
         const error = selectors.getUserTokensError(state);
         const userTokens = selectors.getUserTokens(state);
-        return { error, userTokens };
+        const isLoggedIn = userProfile.isLoggedIn(state);
+        const isAddModalOpen = selectors.isEditTokensModalOpen(state);
+        return {
+            isLoggedIn, error, userTokens, isAddModalOpen,
+        };
     },
     {
         fetchUserTokens: actions.fetchUserTokens,
+        openEditTokensModal: actions.openEditTokensModal,
+        closeEditTokensModal: actions.closeEditTokensModal,
     },
 )
 
 export default class TokensList extends React.Component {
     static propTypes = {
         classes: PropTypes.object.isRequired,
+        isLoggedIn: PropTypes.bool,
         userTokens: PropTypes.arrayOf(PropTypes.shape({
-            tokenId: PropTypes.string.isRequired,
+            tokenId: PropTypes.number.isRequired,
             name: PropTypes.string.isRequired,
             symbol: PropTypes.string.isRequired,
-            rank: PropTypes.string.isRequired,
-            price: PropTypes.string.isRequired,
-            percentChange1h: PropTypes.string.isRequired,
-            percentChange24h: PropTypes.string.isRequired,
-            percentChange7d: PropTypes.string.isRequired,
+            rank: PropTypes.number.isRequired,
+            price: PropTypes.number.isRequired,
+            percentChange1h: PropTypes.number.isRequired,
+            percentChange24h: PropTypes.number.isRequired,
+            percentChange7d: PropTypes.number.isRequired,
             icon: PropTypes.string.isRequired,
         })),
         error: PropTypes.string,
+        isAddModalOpen: PropTypes.bool,
         fetchUserTokens: PropTypes.func,
+        openEditTokensModal: PropTypes.func,
+        closeEditTokensModal: PropTypes.func,
     };
 
     static defaultProps = {
+        isLoggedIn: false,
         error: undefined,
         userTokens: [],
+        isAddModalOpen: false,
         fetchUserTokens: () => { },
+        openEditTokensModal: () => {},
+        closeEditTokensModal: () => {},
     };
 
     componentDidMount() {
@@ -66,7 +89,11 @@ export default class TokensList extends React.Component {
     }
 
     render() {
-        const { classes, userTokens, error } = this.props;
+        const {
+            classes, userTokens, error, isLoggedIn,
+            openEditTokensModal, closeEditTokensModal,
+            isAddModalOpen,
+        } = this.props;
 
         return (
             <Paper className={ classes.root }>
@@ -94,7 +121,7 @@ export default class TokensList extends React.Component {
                     <TableBody>
                         {
                             userTokens.map(n => (
-                                <TableRow key={ n.id }>
+                                <TableRow key={ n.tokenId }>
                                     <TableCell><img src={ n.icon } alt="icon" /></TableCell>
                                     <TableCell>{ n.name }</TableCell>
                                     <TableCell>{ n.symbol }</TableCell>
@@ -108,6 +135,20 @@ export default class TokensList extends React.Component {
                         }
                     </TableBody>
                 </Table>
+                {
+                    isLoggedIn && (
+                        <Button
+                            variant="fab"
+                            color="primary"
+                            aria-label="Add"
+                            className={ classes.button }
+                            onClick={ openEditTokensModal }
+                        >
+                            <AddIcon />
+                        </Button>
+                    )
+                }
+                <EditTokensModal isOpen={ isAddModalOpen } onClose={ closeEditTokensModal } />
             </Paper>
         );
     }

@@ -61,7 +61,7 @@ export default class Header extends React.Component {
                             Crypto Track
                             {
                                 isLoggedIn && (
-                                    `(Logged in as ${name})`
+                                    ` (Logged in as ${name})`
                                 )
                             }
                         </Typography>

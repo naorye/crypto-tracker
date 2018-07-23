@@ -1,20 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
 import Header from './header';
-import style from './style.scss';
 
-export default function App(props) {
-    const { children } = props;
-    return (
-        <div className={ style.app }>
-            <Header />
-            <main>
-                { children }
-            </main>
-        </div>
-    );
+@withStyles({
+    root: {
+    },
+})
+
+
+export default class App extends React.Component {
+    static propTypes = {
+        classes: PropTypes.object.isRequired,
+        children: PropTypes.element.isRequired,
+    };
+
+    render() {
+        const { classes, children } = this.props;
+        return (
+            <div className={ classes.root }>
+                <Header />
+                <main>
+                    { children }
+                </main>
+            </div>
+        );
+    }
 }
-
-App.propTypes = {
-    children: PropTypes.element.isRequired,
-};
